@@ -1,0 +1,42 @@
+# Build
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+# Avalonia Designer
+*.axaml.g.cs
+
+# NuGet
+packages/
+*.nupkg
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Publish
+publish/
+
+# Test
+TestResults/
+
+# Coverage
+coverage/
+*.coverage
+*.coveragexml

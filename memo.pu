@@ -1,0 +1,49 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+
+enum WindowMode {
+  Find
+  Read
+  Write
+}
+
+interface IShortCut {
+  +OnShortCut(e: KeyEventArgs, mod: KeyModifiers) : bool
+}
+
+class MainWindow {
+  +SetWindowMode(windowMode: WindowMode) : void
+}
+
+class FindWindow {
+  +RequestReadWindow : event Action
+  +RequestWriteWindow : event Action
+  +OnShortCut(e, mod) : bool
+}
+
+class ReadWindow {
+  +RequestFindWindow : event Action
+  +RequestWriteWindow : event Action
+  +OnShortCut(e, mod) : bool
+}
+
+class WriteWindow {
+  +RequestFindWindow : event Action
+  +OnShortCut(e, mod) : bool
+}
+
+
+
+MainWindow *-- FindWindow
+MainWindow *-- ReadWindow
+MainWindow *-- WriteWindow
+MainWindow --> WindowMode
+
+FindWindow ..|> IShortCut
+ReadWindow ..|> IShortCut
+WriteWindow ..|> IShortCut
+
+
+
+@enduml
