@@ -29,6 +29,7 @@ class ReadWindow {
 }
 
 class WriteWindow {
+
   +RequestFindWindow : event Action
   +OnShortCut(e, mod) : bool
 }

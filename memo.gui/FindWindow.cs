@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using System;
 using System.Collections.ObjectModel;
+using memo.app;
 
 namespace memo.gui;
 
@@ -10,30 +11,40 @@ public class FindWindow : UserControl, IShortCut
 {
     public event Action? RequestReadWindow;
     public event Action? RequestWriteWindow;
+    int _listForcusIndex;
+    Memo _memo;
+
+    // WidgetItem
+    Label labelFind;
+    TextBox textBox;
+    ListBox listBox;
+    ObservableCollection<string> lstItems;
 
     // コンストラクタ
-    public FindWindow()
+    public FindWindow(Memo memo)
     {
+        this._memo = memo;
 
         // 検索テキストボックスの生成
-        Label labelFind = Ui.CreateLabel("検索:");
-        TextBox textBox = Ui.CreateTextBox();
-
+        labelFind = Ui.CreateLabel("検索:");
+        textBox = Ui.CreateTextBox();
 
         // リストボックスの生成
-        var listBox = Ui.CreateListBox();
+        listBox = Ui.CreateListBox();
 
         // ObservableCollectionの生成
-        var lstItems = new ObservableCollection<string>();
+        lstItems = new ObservableCollection<string>();
         // ObservableCollectionの登録
         listBox.ItemsSource = lstItems;
 
-        // lstItemsの更新
+        // lstItemsの更新 -----------------------------Dummy -----------------------SetColumn
         var strs = DummyStrings.GetDummyStrings();
         foreach (var str in strs)
         {
             lstItems.Add(str);
         }
+        Console.WriteLine(lstItems.Count);
+
 
         // Layout
         Grid mainGrid = new Grid
@@ -58,6 +69,8 @@ public class FindWindow : UserControl, IShortCut
 
         // リストボックスの登録
         Content = mainGrid;
+
+
     }
 
     public bool OnShortCut(KeyEventArgs e, KeyModifiers mod)
@@ -73,6 +86,16 @@ public class FindWindow : UserControl, IShortCut
                 Console.WriteLine("Key W");
                 RequestWriteWindow?.Invoke();
                 return true;
+
+            case Key.J:
+                this._listForcusIndex++;
+                if (this._listForcusIndex >= this.listBox.ItemCount)
+                {
+                    _listForcusIndex = 0;
+                }
+
+                break;
+
 
         }
         return false;

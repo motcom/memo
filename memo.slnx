@@ -1,2 +1,4 @@
 <Solution>
+  <Project Path="memo.app/memo.app.csproj" />
+  <Project Path="memo.gui/memo.gui.csproj" />
 </Solution>

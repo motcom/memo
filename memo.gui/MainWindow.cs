@@ -4,15 +4,20 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using System;
 using System.Collections.ObjectModel;
+using memo.app;
 
 namespace memo.gui;
 
 public class MainWindow : Window
 {
+    // App保持
+    Memo _memo;
+
     // コンポネント保持
     FindWindow _findWnd;
     ReadWindow _readWnd;
     WriteWindow _writeWnd;
+
 
     // Windowデフォルトプロパティ
     Size _windowSize = new Size(640, 640);
@@ -20,10 +25,12 @@ public class MainWindow : Window
     // コンストラクタ
     public MainWindow()
     {
+        // メモAppの生成
+        _memo = new();
         // コンポーネント生成
-        _findWnd = new FindWindow();
-        _readWnd = new ReadWindow();
-        _writeWnd = new WriteWindow();
+        _findWnd = new FindWindow(_memo);
+        _readWnd = new ReadWindow(_memo);
+        _writeWnd = new WriteWindow(_memo);
 
         // ウィンドウプロパティ
         Width = _windowSize.Width;
