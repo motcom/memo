@@ -2,8 +2,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using System;
-using System.Collections.ObjectModel;
 using memo.app;
 
 namespace memo.gui;
@@ -12,7 +10,6 @@ public class MainWindow : Window
 {
     // App保持
     Memo _memo;
-
     // コンポネント保持
     FindWindow _findWnd;
     ReadWindow _readWnd;
@@ -38,12 +35,15 @@ public class MainWindow : Window
 
         Topmost = true;
 
-        _findWnd.RequestReadWindow += () => SetWindowMode(WindowMode.Read);
-        _findWnd.RequestWriteWindow += () => SetWindowMode(WindowMode.Write);
+        _findWnd.RequestReadWindow += memoEnt =>
+        {
+            _readWnd.SetMemoEntity(memoEnt);
+            SetWindowMode(WindowMode.Read);
+        };
 
+        _findWnd.RequestWriteWindow += () => SetWindowMode(WindowMode.Write);
         _readWnd.RequestFindWindow += () => SetWindowMode(WindowMode.Find);
         _readWnd.RequestWriteWindow += () => SetWindowMode(WindowMode.Write);
-
         _writeWnd.RequestFindWindow += () => SetWindowMode(WindowMode.Find);
 
 

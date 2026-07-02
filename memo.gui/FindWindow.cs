@@ -1,6 +1,7 @@
-using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Input;
+using Avalonia;
 using System;
 using System.Collections.ObjectModel;
 using memo.app;
@@ -9,95 +10,138 @@ namespace memo.gui;
 
 public class FindWindow : UserControl, IShortCut
 {
-    public event Action? RequestReadWindow;
+    public event Action<MemoEntity>? RequestReadWindow;
     public event Action? RequestWriteWindow;
-    int _listForcusIndex;
-    Memo _memo;
+
+    // コンポネント
+    readonly Memo _memo;
 
     // WidgetItem
-    Label labelFind;
-    TextBox textBox;
-    ListBox listBox;
-    ObservableCollection<string> lstItems;
+    private readonly Label _labelFindn;
+    readonly TextBox _textBox;
+    readonly ListBox _listBox;
+    readonly ObservableCollection<MemoEntity> _lstItems;
+
 
     // コンストラクタ
     public FindWindow(Memo memo)
     {
-        this._memo = memo;
+        // コンポネントの参照
+        _memo = memo;
 
         // 検索テキストボックスの生成
-        labelFind = Ui.CreateLabel("検索:");
-        textBox = Ui.CreateTextBox();
+        _labelFindn = Ui.CreateLabel("検索:");
+        _textBox = Ui.CreateTextBox();
 
         // リストボックスの生成
-        listBox = Ui.CreateListBox();
+        _listBox = Ui.CreateListBox();
+        _listBox.ItemTemplate = new FuncDataTemplate<MemoEntity>((memoEnt, _) =>
+            new TextBlock
+            {
+                Text = memoEnt.Index + "\n" + memoEnt.Desc,
+                FontSize = 10,
+                Margin = new Thickness(2),
+                Padding = new Thickness(3),
+            });
 
         // ObservableCollectionの生成
-        lstItems = new ObservableCollection<string>();
+        _lstItems = [];
         // ObservableCollectionの登録
-        listBox.ItemsSource = lstItems;
+        _listBox.ItemsSource = _lstItems;
 
-        // lstItemsの更新 -----------------------------Dummy -----------------------SetColumn
-        var strs = DummyStrings.GetDummyStrings();
-        foreach (var str in strs)
-        {
-            lstItems.Add(str);
-        }
-        Console.WriteLine(lstItems.Count);
 
 
         // Layout
-        Grid mainGrid = new Grid
+        Grid mainGrid = new()
+
         {
             ColumnDefinitions = ColumnDefinitions.Parse("auto,*"),
             RowDefinitions = RowDefinitions.Parse("auto,*")
         };
 
-        Grid.SetColumn(labelFind, 0);
-        Grid.SetRow(labelFind, 0);
+        Grid.SetColumn(_labelFindn, 0);
+        Grid.SetRow(_labelFindn, 0);
 
-        Grid.SetColumn(textBox, 1);
-        Grid.SetRow(textBox, 0);
+        Grid.SetColumn(_textBox, 1);
+        Grid.SetRow(_textBox, 0);
 
-        Grid.SetColumnSpan(listBox, 2);
-        Grid.SetColumn(listBox, 1);
-        Grid.SetRow(listBox, 1);
+        Grid.SetColumnSpan(_listBox, 2);
+        Grid.SetColumn(_listBox, 1);
+        Grid.SetRow(_listBox, 1);
 
-        mainGrid.Children.Add(labelFind);
-        mainGrid.Children.Add(textBox);
-        mainGrid.Children.Add(listBox);
+        mainGrid.Children.Add(_labelFindn);
+        mainGrid.Children.Add(_textBox);
+        mainGrid.Children.Add(_listBox);
 
         // リストボックスの登録
         Content = mainGrid;
 
+        // イベント処理
+        _textBox.TextChanged += OnTextBoxTextChange;
+
 
     }
+
+    // イベントハンドラ------------------------------------------------------------
+    private void OnTextBoxTextChange(object? sender, TextChangedEventArgs e)
+    {
+        var searchText = _textBox.Text ??= ".*";
+
+        _lstItems.Clear();
+        var findResult = _memo.Find(searchText);
+        foreach (var memoEnt in findResult)
+        {
+            _lstItems.Add(memoEnt);
+        }
+    }
+
 
     public bool OnShortCut(KeyEventArgs e, KeyModifiers mod)
     {
         switch (e.Key)
         {
-            case Key.R:
-                Console.WriteLine("Key R");
-                RequestReadWindow?.Invoke();
-                return true;
 
-            case Key.W:
+            case Key.W when mod.HasFlag(KeyModifiers.Control):
                 Console.WriteLine("Key W");
                 RequestWriteWindow?.Invoke();
                 return true;
 
-            case Key.J:
-                this._listForcusIndex++;
-                if (this._listForcusIndex >= this.listBox.ItemCount)
-                {
-                    _listForcusIndex = 0;
-                }
-
+            case Key.J when mod.HasFlag(KeyModifiers.Control):
+                OnMoveListFocusn(1);
                 break;
 
+            case Key.K when mod.HasFlag(KeyModifiers.Control):
+                OnMoveListFocusn(-1);
+                break;
 
+            case Key.Enter:
+                Console.WriteLine("Key Enter");
+                return OnSelectIndex();
         }
         return false;
+    }
+
+    // イベントハンドラ
+    private bool OnSelectIndex()
+    {
+        if (_listBox.SelectedItem is not MemoEntity memoEnt) return false;
+
+        RequestReadWindow?.Invoke(memoEnt);
+        return true;
+    }
+
+    // リストボックスを選択するutility
+    private void OnMoveListFocusn(int delta)
+    {
+        if (_listBox.ItemCount == 0) return;
+
+        var next = _listBox.SelectedIndex + delta;
+
+        if (next >= _listBox.ItemCount) next = 0;
+        if (next < 0) next = _listBox.ItemCount - 1;
+
+        _listBox.SelectedIndex = next;
+        _listBox.ScrollIntoView(_listBox.SelectedItem!);
+        _listBox.Focus();
     }
 }

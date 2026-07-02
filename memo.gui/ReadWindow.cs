@@ -11,6 +11,7 @@ public class ReadWindow : UserControl, IShortCut
     public event Action? RequestFindWindow;
     public event Action? RequestWriteWindow;
     Memo _memo;
+    TextBlock _textBlock;
 
 
     // コンストラクタ
@@ -19,24 +20,29 @@ public class ReadWindow : UserControl, IShortCut
         this._memo = memo;
 
         // 生成
-        TextBlock textBlock = Ui.CreateTextBlock();
+        _textBlock = Ui.CreateTextBlock();
 
         // Debug用仮
-        textBlock.Text = "hello";
+        _textBlock.Text = "";
 
         // テキストブロックの登録
-        Content = textBlock;
+        Content = _textBlock;
+    }
+
+    public void SetMemoEntity(MemoEntity memoEnt)
+    {
+        _textBlock.Text = memoEnt.Doc;
     }
 
     public bool OnShortCut(KeyEventArgs e, KeyModifiers mod)
     {
         switch (e.Key)
         {
-            case Key.F:
+            case Key.F when mod.HasFlag(KeyModifiers.Control):
                 Console.WriteLine("Key F");
                 RequestFindWindow?.Invoke();
                 return true;
-            case Key.W:
+            case Key.W when mod.HasFlag(KeyModifiers.Control):
                 Console.WriteLine("Key W");
                 RequestWriteWindow?.Invoke();
                 return true;

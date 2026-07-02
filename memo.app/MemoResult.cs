@@ -2,5 +2,5 @@ namespace memo.app;
 
 public enum MemoResult
 {
-    OK, INDEX_NOTFOUND, DOCUMENT_NOTFOUND
+    OK, INDEX_NOTFOUND, DOCUMENT_NOTFOUND, DUPLICATE_INDEX
 }
